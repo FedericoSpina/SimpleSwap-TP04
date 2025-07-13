@@ -69,8 +69,9 @@ function disableMintButtons() {
 async function fetchBalances() {
     const balanceA = await tokenA.balanceOf(userAddress);
     const balanceB = await tokenB.balanceOf(userAddress);
-    document.getElementById("balanceA").innerText = balanceA.toString();
-    document.getElementById("balanceB").innerText = balanceB.toString();
+
+    document.getElementById("send-balance").innerText = reverseSwap ? balanceB.toString() : balanceA.toString();
+    document.getElementById("receive-balance").innerText = reverseSwap ? balanceA.toString() : balanceB.toString();
 }
 
 // Get current exchange price between tokenA and tokenB

@@ -1,5 +1,11 @@
+/**
+ *Submitted for verification at Etherscan.io on 2025-06-23
+*/
+
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.8.2 <0.9.0;
+// OpenZeppelin Contracts (last updated v5.1.0) (token/ERC20/IERC20.sol)
+
+pragma solidity ^0.8.20;
 
 /**
  * @dev Interface of the ERC-20 standard as defined in the ERC.
@@ -2588,10 +2594,11 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
     }
 }
 
-// File: flateneado/SimpleSwap.sol
+// File: contracts/curso/SimpleSwap6.sol
 
 
 pragma solidity >=0.8.2 <0.9.0;
+
 
 
 

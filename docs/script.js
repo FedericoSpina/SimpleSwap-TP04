@@ -32,7 +32,7 @@ async function connect() {
         if (typeof window.ethereum !== "undefined") {
             await window.ethereum.request({ method: "eth_requestAccounts" });
 
-            provider = new ethers.BrowserProvider(window.ethereum);
+            provider = new ethers.providers.Web3Provider(window.ethereum);
             signer = await provider.getSigner();
             userAddress = await signer.getAddress();
             document.getElementById("account").innerText = userAddress;

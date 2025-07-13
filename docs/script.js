@@ -94,7 +94,7 @@ async function setValueTokenToSpend() {
             return;
         }
 
-        const parsedAmount = ethers.BigNumber.from(input);
+        const parsedAmount = ethers.utils.parseUnits(input, 18);
         let reserveIn, reserveOut, symbolOut;
 
         if (reverseSwap) {

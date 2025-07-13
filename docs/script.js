@@ -50,14 +50,17 @@ async function connect() {
         await getPrice(); // Attempt to get price immediately after connection
         await updateSwapButton(); // Update swap button state based on balances/liquidity
 
+        // --- Enable UI elements after successful connection ---
         document.getElementById("mintAmountA").disabled = false;
         document.getElementById("mintAmountB").disabled = false;
         document.getElementById("mintButtonA").disabled = false;
         document.getElementById("mintButtonB").disabled = false;
         document.getElementById("addLiquidityButton").disabled = false; // Enable liquidity button
+        document.querySelector('.IHAVE').disabled = false; // Enable "You send" input field
+        document.getElementById("swap-reverse-btn").disabled = false; // Enable swap reverse button
+
     } catch (err) {
         console.error("❌ MetaMask connection error:", err);
-        // More specific error messages for better user feedback
         let errorMessage = "Error connecting to MetaMask.";
         if (err.code === 4001) {
             errorMessage = "Connection rejected by user.";
@@ -66,6 +69,7 @@ async function connect() {
         }
         alert("❌ " + errorMessage);
         disableAllButtons(); // Disable all interaction buttons on error
+        document.getElementById("connect").disabled = false; // Keep connect button enabled
     }
 }
 
@@ -75,10 +79,12 @@ function disableAllButtons() {
     document.getElementById("mintAmountB").disabled = true;
     document.getElementById("mintButtonA").disabled = true;
     document.getElementById("mintButtonB").disabled = true;
-    document.getElementById("addLiquidityButton").disabled = true; // Disable liquidity button
-    document.querySelector('.IHAVE').disabled = true;
+    document.getElementById("addLiquidityButton").disabled = true;
+    document.querySelector('.IHAVE').disabled = true; // Disable "You send" input
+    document.querySelector('.IWANT').value = ""; // Clear output field
     document.getElementById("swap-submit").disabled = true;
-    document.getElementById("swap-reverse-btn").disabled = true;
+    document.getElementById("swap-reverse-btn").disabled = true; // Disable swap reverse button
+    document.getElementById("price").textContent = "0 TKB"; // Reset price display
 }
 
 // Show token balances
@@ -92,6 +98,7 @@ async function fetchBalances() {
         const balanceA = await tokenA.balanceOf(userAddress);
         const balanceB = await tokenB.balanceOf(userAddress);
 
+        // Format balances for display
         document.getElementById("send-balance").innerText = reverseSwap ? ethers.utils.formatUnits(balanceB, 18) : ethers.utils.formatUnits(balanceA, 18);
         document.getElementById("receive-balance").innerText = reverseSwap ? ethers.utils.formatUnits(balanceA, 18) : ethers.utils.formatUnits(balanceB, 18);
     } catch (err) {
@@ -110,7 +117,8 @@ async function getPrice() {
     try {
         const price = await simpleSwap.getPrice(tokenAAddress, tokenBAddress);
         currentPrice = ethers.utils.formatUnits(price, 18);
-        document.getElementById("price").innerText = currentPrice + (reverseSwap ? " TKA/TKB" : " TKB/TKA"); // Adjust price display based on swap direction
+        // Adjust price display based on swap direction
+        document.getElementById("price").innerText = currentPrice + (reverseSwap ? " TKA/TKB" : " TKB/TKA");
     } catch (err) {
         console.error("Error getting price:", err);
         // Specific check for "No liquidity available"
@@ -128,7 +136,7 @@ async function setValueTokenToSpend() {
     const outputInput = document.querySelector('.IWANT');
     const priceLabel = document.getElementById("price");
 
-    if (!simpleSwap || !tokenAAddress || !tokenBAddress) {
+    if (!simpleSwap || !tokenAAddress || !tokenBAddress || !userAddress) {
         outputInput.value = "Connect wallet";
         priceLabel.textContent = "Connect wallet";
         return;
@@ -139,6 +147,7 @@ async function setValueTokenToSpend() {
     if (!input || isNaN(input) || parseFloat(input) <= 0) {
         outputInput.value = "";
         priceLabel.textContent = "0 " + (reverseSwap ? "TKA" : "TKB");
+        await updateSwapButton(); // Still update button even if input is empty
         return;
     }
 
@@ -162,6 +171,7 @@ async function setValueTokenToSpend() {
         if (reserveIn.isZero() || reserveOut.isZero()) {
             outputInput.value = "No liquidity";
             priceLabel.textContent = "No liquidity";
+            await updateSwapButton(); // Update button to reflect no liquidity
             return;
         }
 
@@ -171,7 +181,6 @@ async function setValueTokenToSpend() {
         await updateSwapButton();
     } catch (err) {
         console.error("Error calculating output:", err);
-        // More specific error message for no liquidity during calculation
         if (err.message && err.message.includes("No liquidity available")) {
              outputInput.value = "No liquidity";
              priceLabel.textContent = "No liquidity";
@@ -179,6 +188,7 @@ async function setValueTokenToSpend() {
             outputInput.value = "Error";
             priceLabel.textContent = "Error";
         }
+        await updateSwapButton(); // Update button on error
     }
 }
 
@@ -210,7 +220,6 @@ async function mintToken(tokenContract, inputId, tokenName) {
         hideSpinner();
         document.getElementById(inputId).value = ""; // Clear input after mint
         await fetchBalances();
-        // No need to update price or swap button after minting, as it doesn't change liquidity.
     } catch (err) {
         console.error(err);
         hideSpinner();
@@ -305,7 +314,7 @@ async function updateSwapButton() {
     try {
         const parsedAmount = ethers.utils.parseUnits(inputAmount, 18);
         const tokenToSpend = reverseSwap ? tokenB : tokenA;
-        const tokenToReceive = reverseSwap ? tokenA : tokenB;
+        // const tokenToReceive = reverseSwap ? tokenA : tokenB; // Not directly used here
 
         const allowance = await tokenToSpend.allowance(userAddress, simpleSwapAddress);
         const balance = await tokenToSpend.balanceOf(userAddress);
@@ -321,22 +330,24 @@ async function updateSwapButton() {
         }
 
         if (balance.lt(parsedAmount)) {
-            button.innerText = "Insufficient balance";
+            button.innerText = `Insufficient ${reverseSwap ? 'Token B' : 'Token A'} balance`;
             button.disabled = true;
-        } else if (reserveIn.isZero()) { // Check if the relevant reserve is zero
+        } else if (reserveIn.isZero()) {
             button.innerText = "No liquidity";
             button.disabled = true;
-        }
-        // This `reserveA.lt(parsedAmount)` check was specifically for Token A.
-        // It needs to be dynamic based on the swap direction and the correct reserve.
-        // The `reserveIn.isZero()` check above covers the "no liquidity" initial state better.
-        // For "low liquidity" during an actual swap, the `swapExactTokensForTokens` call will revert.
-        else if (allowance.gte(parsedAmount)) {
-            button.innerText = "Swap";
-            button.disabled = false;
         } else {
-            button.innerText = "Approve";
-            button.disabled = false;
+            // Check if the amount to swap exceeds the available reserve
+            // This is a common check to prevent transactions from failing due to insufficient liquidity in the pool
+            if (parsedAmount.gt(reserveIn)) {
+                button.innerText = "Insufficient pool liquidity";
+                button.disabled = true;
+            } else if (allowance.gte(parsedAmount)) {
+                button.innerText = "Swap";
+                button.disabled = false;
+            } else {
+                button.innerText = "Approve";
+                button.disabled = false;
+            }
         }
     } catch (err) {
         console.error("Error updating swap button:", err);
@@ -350,8 +361,8 @@ function toggleSwapDirection() {
 
     const sendLabel = document.getElementById("send-label");
     const receiveLabel = document.getElementById("receive-label");
-    const sendBalanceElement = document.getElementById("send-balance");
-    const receiveBalanceElement = document.getElementById("receive-balance");
+    // const sendBalanceElement = document.getElementById("send-balance"); // Not directly used here
+    // const receiveBalanceElement = document.getElementById("receive-balance"); // Not directly used here
     const inputElement = document.querySelector('.IHAVE');
     const outputElement = document.querySelector('.IWANT');
 

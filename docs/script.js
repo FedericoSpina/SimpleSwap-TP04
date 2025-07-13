@@ -27,35 +27,38 @@ let reverseSwap = false;
 
 // Connect to MetaMask and initialize contracts
 async function connect() {
+    if (!window.ethereum) {
+        alert("❌ MetaMask not detected");
+        return;
+    }
+
     try {
-        if (typeof window.ethereum !== "undefined") {
-            await window.ethereum.request({ method: "eth_requestAccounts" });
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
 
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = await provider.getSigner();
-            userAddress = await signer.getAddress();
-            document.getElementById("account").innerText = userAddress;
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        userAddress = accounts[0];
 
-            tokenA = new ethers.Contract(tokenAAddress, tokenAAbi, signer);
-            tokenB = new ethers.Contract(tokenBAddress, tokenBAbi, signer);
-            simpleSwap = new ethers.Contract(simpleSwapAddress, abiSS, signer);
+        document.getElementById("account").innerText = userAddress;
 
-            await fetchBalances();
-            await getPrice();
+        tokenA = new ethers.Contract(tokenAAddress, tokenAAbi, signer);
+        tokenB = new ethers.Contract(tokenBAddress, tokenBAbi, signer);
+        simpleSwap = new ethers.Contract(simpleSwapAddress, abiSS, signer);
 
-            document.getElementById("mintAmountA").disabled = false;
-            document.getElementById("mintAmountB").disabled = false;
-            document.getElementById("mintButtonA").disabled = false;
-            document.getElementById("mintButtonB").disabled = false;
-        } else {
-            alert("❌ MetaMask not detected");
-        }
+        await fetchBalances();
+        await getPrice();
+
+        document.getElementById("mintAmountA").disabled = false;
+        document.getElementById("mintAmountB").disabled = false;
+        document.getElementById("mintButtonA").disabled = false;
+        document.getElementById("mintButtonB").disabled = false;
     } catch (err) {
-        console.error(err);
-        alert("❌ Error connecting to MetaMask");
+        console.error("❌ MetaMask connection error:", err);
+        alert("❌ Error connecting to MetaMask: " + (err.message || err));
         disableMintButtons();
     }
 }
+
 
 function disableMintButtons() {
     document.getElementById("mintAmountA").disabled = true;

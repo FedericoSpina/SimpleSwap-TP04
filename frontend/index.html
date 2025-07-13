@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SimpleSwap</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.1/dist/ethers.umd.min.js"></script>
+    <script type="module" src="script.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @keyframes spin-swap {
+            100% {
+                transform: rotate(180deg);
+            }
+        }
+
+        .swap-animate {
+            animation: spin-swap 0.7s cubic-bezier(.4, 2.5, .6, 1) 1;
+            animation-fill-mode: forwards;
+
+        }
+    </style>
+</head>
+
+<body class="bg-gray-700 text-white min-h-screen py-6 ">
+    <div class="max-w-xl mx-auto bg-gray-900 border border-gray-700 rounded-2xl p-6 shadow-lg">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-cyan-400">SimpleSwap</h1>
+                <p class="text-sm text-gray-400">Swap ERC-20 tokens with ease</p>
+            </div>
+            <button id="conect" onclick="connect()"
+                class="rounded-md flex items-center border border-gray-800 py-2 px-4 text-center text-sm transition-all text-slate-600 hover:bg-slate-100 focus:bg-slate-200 active:bg-slate-100 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none">
+                <img src="https://docs.material-tailwind.com/icons/metamask.svg" alt="metamask"
+                    class="h-5 w-5 mr-2" />
+                Connect Wallet
+            </button>
+        </div>
+
+        <div class="flex flex-col gap-6">
+
+            <!-- Input de "You send" -->
+            <div class="flex flex-col gap-1">
+                <div class="flex justify-between items-center">
+                    <label id="send-label" class="text-base text-gray-300 font-semibold">You send (Token A)</label>
+                    <p class="text-sm text-gray-400">Balance: <span id="send-balance">0</span></p>
+                </div>
+                <input onInput="setValueTokenToSpend(); updateSwapButton();" type="text"
+                    class="IHAVE w-full bg-gray-800 text-white px-6 py-4 rounded-2xl text-right text-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    placeholder="0.0">
+            </div>
+
+            <!-- Botón Reverse Swap centrado y animado SOLO al hacer click -->
+            <div class="flex justify-center">
+                <button id="swap-reverse-btn" onclick="animateSwapButton(); toggleSwapDirection();"
+                    class="bg-cyan-600 hover:bg-cyan-700 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-xl transition-transform duration-300 active:scale-95 border-4 border-gray-900"
+                    aria-label="Reverse Swap">
+                    <svg id="swap-reverse-icon" class="w-9 h-9" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <path fill="currentColor"
+                            d="M12 4V1L7 6l5 5V7c3.31 0 6 2.69 6 6 0 1.3-.42 2.5-1.13 3.47l1.46 1.46A7.963 7.963 0 0 0 20 13c0-4.42-3.58-8-8-8zm-6.87 2.53L3.67 7.99A7.963 7.963 0 0 0 4 11c0 4.42 3.58 8 8 8v3l5-5-5-5v3c-3.31 0-6-2.69-6-6 0-1.3.42-2.5 1.13-3.47z" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Input de "You receive" -->
+            <div class="flex flex-col gap-1">
+                <div class="flex justify-between items-center">
+                    <label id="receive-label" class="text-base text-gray-300 font-semibold">You receive (Token
+                        B)</label>
+                    <p class="text-sm text-gray-400">Balance: <span id="receive-balance">0</span></p>
+                </div>
+                <input type="text" class="IWANT w-full bg-gray-800 text-white px-6 py-4 rounded-2xl text-right text-lg"
+                    placeholder="0.0" disabled>
+            </div>
+
+            <div class="flex justify-between text-base text-gray-400 border-t pt-3">
+                <span id="price-label">Price:</span>
+                <span id="price">0 TKB</span>
+            </div>
+
+            <button id="swap-submit" onclick="handleApproveOrSwap()" disabled
+                class="w-full bg-gradient-to-r from-cyan-500 to-blue-500 border border-gray-800 hover:from-cyan-600 hover:to-blue-600 text-white py-5 rounded-2xl text-xl font-bold transition disabled:opacity-50 shadow-lg">
+                Exchange
+            </button>
+        </div>
+
+        <div class="mt-10">
+            <h2 class="text-center text-lg font-semibold text-gray-300 mb-4">Mint Tokens</h2>
+            <div class="flex flex-col gap-3">
+                <div class="flex gap-2">
+                    <input id="mintAmountA" type="number" placeholder="Mint Token A" disabled
+                        class="flex-1 bg-gray-800 px-4 py-2 rounded-xl focus:outline-none">
+                    <button id="mintButtonA" onclick="mintTokenA()" disabled
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl">Mint
+                        A</button>
+                </div>
+                <div class="flex gap-2">
+                    <input id="mintAmountB" type="number" placeholder="Mint Token B" disabled
+                        class="flex-1 bg-gray-800 px-4 py-2 rounded-xl focus:outline-none">
+                    <button id="mintButtonB" onclick="mintTokenB()" disabled
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl">Mint
+                        B</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-400">Connected Wallet:</p>
+            <p id="account" class="text-xs text-cyan-400 break-all">-</p>
+        </div>
+
+        <div id="spinner" class="spinner-container mt-6 hidden">
+            <div class="spinner mx-auto border-t-4 border-cyan-500 rounded-full w-8 h-8 animate-spin"></div>
+        </div>
+        <div class="mt-6 text-xs text-gray-500 text-center">
+            <p>Developed by Federico S.</p>
+            <p>© 2025 SimpleSwap - Testnet only purpose</p>
+        </div>
+    </div>
+
+
+</body>
+
+</html>

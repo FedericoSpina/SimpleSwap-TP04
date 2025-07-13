@@ -20,6 +20,37 @@
             animation-fill-mode: forwards;
 
         }
+
+        /* Spinner styles */
+        .spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 40px;
+            /* Adjust as needed */
+        }
+
+        .spinner {
+            border-top-color: #06b6d4;
+            /* Tailwind cyan-500 */
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+            border-left-color: transparent;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
@@ -39,7 +70,6 @@
 
         <div class="flex flex-col gap-6">
 
-            <!-- Input de "You send" -->
             <div class="flex flex-col gap-1">
                 <div class="flex justify-between items-center">
                     <label id="send-label" class="text-base text-gray-300 font-semibold">You send (Token A)</label>
@@ -50,7 +80,6 @@
                     placeholder="0.0">
             </div>
 
-            <!-- Botón Reverse Swap centrado y animado SOLO al hacer click -->
             <div class="flex justify-center">
                 <button id="swap-reverse-btn" onclick="animateSwapButton(); toggleSwapDirection();"
                     class="bg-cyan-600 hover:bg-cyan-700 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-xl transition-transform duration-300 active:scale-95 border-4 border-gray-900"
@@ -63,7 +92,6 @@
                 </button>
             </div>
 
-            <!-- Input de "You receive" -->
             <div class="flex flex-col gap-1">
                 <div class="flex justify-between items-center">
                     <label id="receive-label" class="text-base text-gray-300 font-semibold">You receive (Token
@@ -86,7 +114,7 @@
         </div>
 
         <div class="mt-10">
-            <h2 class="text-center text-lg font-semibold text-gray-300 mb-4">Mint Tokens</h2>
+            <h2 class="text-center text-lg font-semibold text-gray-300 mb-4">Mint Tokens & Liquidity</h2>
             <div class="flex flex-col gap-3">
                 <div class="flex gap-2">
                     <input id="mintAmountA" type="number" placeholder="Mint Token A" disabled
@@ -101,6 +129,16 @@
                     <button id="mintButtonB" onclick="mintTokenB()" disabled
                         class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl">Mint
                         B</button>
+                </div>
+                <div class="mt-4">
+                    <p class="text-sm text-gray-400 mb-2">Initialize the swap pool with liquidity:</p>
+                    <button id="addLiquidityButton" onclick="addInitialLiquidity()" disabled
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-3 rounded-xl disabled:opacity-50">
+                        Add Initial Liquidity (1000 TKA & 1000 TKB)
+                    </button>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Requires a balance of at least 1000 TKA and 1000 TKB.
+                    </p>
                 </div>
             </div>
         </div>

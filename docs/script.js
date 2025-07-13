@@ -2,11 +2,24 @@
 // Connects to a deployed SimpleSwap smart contract and two ERC20 mock tokens
 // Handles: wallet connection, token balance fetching, minting, token swap with approval, and adding liquidity.
 
-const simpleSwapAddress = "0xAB17AD9076268185f98D6408e066819E2Bd9d04E";
-const tokenAAddress = "0xF5868801cf665b60821FBD26e0846326BfCCbD79";
-const tokenBAddress = "0x4c55a1C8606B53d4c26FBc75433C1698F546f48e";
+// IMPORTANT: Update these addresses to your deployed contract and token addresses
+const simpleSwapAddress = "0x57B8085092473392983D8f311903814ecd1ada62";
+const tokenAAddress = "0xA142c536A58dc69584C1e345BfAD8c753c2a54C4";
+const tokenBAddress = "0x5EBedce1861165D427BEa9D0fc27F99Aa8cD4284";
+
+// Token ABIs (ERC20 standard interface) - copied from your provided code
+const tokenAAbi = [ { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "inputs": [ { "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "allowance", "type": "uint256" }, { "internalType": "uint256", "name": "needed", "type": "uint256" } ], "name": "ERC20InsufficientAllowance", "type": "error" }, { "inputs": [ { "internalType": "address", "name": "sender", "type": "address" }, { "internalType": "uint256", "name": "balance", "type": "uint256" }, { "internalType": "uint256", "name": "needed", "type": "uint256" } ], "name": "ERC20InsufficientBalance", "type": "error" }, { "inputs": [ { "internalType": "address", "name": "approver", "type": "address" } ], "name": "ERC20InvalidApprover", "type": "error" }, { "inputs": [ { "internalType": "address", "name": "receiver", "type": "address" } ], "name": "ERC20InvalidReceiver", "type": "error" }, { "inputs": [ { "internalType": "address", "name": "sender", "type": "address" } ], "name": "ERC20InvalidSender", "type": "error" }, { "inputs": [ { "internalType": "address", "name": "spender", "type": "address" } ], "name": "ERC20InvalidSpender", "type": "error" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "spender", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Transfer", "type": "event" }, { "inputs": [ { "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "spender", "type": "address" } ], "name": "allowance", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "approve", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "account", "type": "address" } ], "name": "balanceOf", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "decimals", "outputs": [ { "internalType": "uint8", "name": "", "type": "uint8" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" } ], "name": "mint", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "name", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "symbol", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalSupply", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "transfer", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "transferFrom", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" } ];
+const tokenBAbi = [ { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "inputs": [ { "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "allowance", "type": "uint256" }, { "internalType": "uint256", "name": "needed", "type": "uint256" } ], "name": "ERC20InsufficientAllowance", "type": "error" }, { "inputs": [ { "internalType": "address", "name": "sender", "type": "address" }, { "internalType": "uint256", "name": "balance", "type": "uint256" }, { "internalType": "uint256", "name": "needed", "type": "uint256" } ], "name": "ERC20InsufficientBalance", "type": "error" }, { "inputs": [ { "internalType": "address", "name": "approver", "type": "address" } ], "name": "ERC20InvalidApprover", "type": "error" }, { "inputs": [ { "internalType": "address", "name": "receiver", "type": "address" } ], "name": "ERC20InvalidReceiver", "type": "error" }, { "inputs": [ { "internalType": "address", "name": "sender", "type": "address" } ], "name": "ERC20InvalidSender", "type": "error" }, { "inputs": [ { "internalType": "address", "name": "spender", "type": "address" } ], "name": "ERC20InvalidSpender", "type": "error" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "spender", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "Transfer", "type": "event" }, { "inputs": [ { "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "spender", "type": "address" } ], "name": "allowance", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "approve", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "account", "type": "address" } ], "name": "balanceOf", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "decimals", "outputs": [ { "internalType": "uint8", "name": "", "type": "uint8" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "amount", "type": "uint256" } ], "name": "mint", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "name", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "symbol", "outputs": [ { "internalType": "string", "name": "", "type": "string" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalSupply", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "transfer", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "value", "type": "uint256" } ], "name": "transferFrom", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" } ];
+
+// SimpleSwap ABI - copied from your provided code
+const abiSS = [ { "inputs": [ { "internalType": "address", "name": "_tokenA", "type": "address" }, { "internalType": "address", "name": "_tokenB", "type": "address" } ], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "provider", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "amountA", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "amountB", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "liquidityMinted", "type": "uint256" } ], "name": "LiquidityAdded", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "provider", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "amountA", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "amountB", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "liquidityBurned", "type": "uint256" } ], "name": "LiquidityRemoved", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "internalType": "address", "name": "swapper", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "amountIn", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "amountOut", "type": "uint256" }, { "indexed": false, "internalType": "address", "name": "tokenIn", "type": "address" }, { "indexed": false, "internalType": "address", "name": "tokenOut", "type": "address" } ], "name": "TokensSwapped", "type": "event" }, { "inputs": [ { "internalType": "address", "name": "addTokenA", "type": "address" }, { "internalType": "address", "name": "addTokenB", "type": "address" }, { "internalType": "uint256", "name": "amountADesired", "type": "uint256" }, { "internalType": "uint256", "name": "amountBDesired", "type": "uint256" }, { "internalType": "uint256", "name": "amountAMin", "type": "uint256" }, { "internalType": "uint256", "name": "amountBMin", "type": "uint256" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "deadline", "type": "uint256" } ], "name": "addLiquidity", "outputs": [ { "internalType": "uint256", "name": "amountA", "type": "uint256" }, { "internalType": "uint256", "name": "amountB", "type": "uint256" }, { "internalType": "uint256", "name": "liquidity", "type": "uint256" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "amountIn", "type": "uint256" }, { "internalType": "uint256", "name": "amountA", "type": "uint256" }, { "internalType": "uint256", "name": "amountB", "type": "uint256" } ], "name": "getAmountOut", "outputs": [ { "internalType": "uint256", "name": "amountOut", "type": "uint256" } ], "stateMutability": "pure", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "_tokenA", "type": "address" }, { "internalType": "address", "name": "_tokenB", "type": "address" } ], "name": "getPrice", "outputs": [ { "internalType": "uint256", "name": "price", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "", "type": "address" } ], "name": "liquidityBalance", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "addTokenA", "type": "address" }, { "internalType": "address", "name": "addTokenB", "type": "address" }, { "internalType": "uint256", "name": "liquidity", "type": "uint256" }, { "internalType": "uint256", "name": "amountAMin", "type": "uint256" }, { "internalType": "uint256", "name": "amountBMin", "type": "uint256" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "deadline", "type": "uint256" } ], "name": "removeLiquidity", "outputs": [ { "internalType": "uint256", "name": "amountA", "type": "uint256" }, { "internalType": "uint256", "name": "amountB", "type": "uint256" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "reserveA", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "reserveB", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "amountIn", "type": "uint256" }, { "internalType": "uint256", "name": "amountOutMin", "type": "uint256" }, { "internalType": "address[]", "name": "path", "type": "address[]" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "deadline", "type": "uint256" } ], "name": "swapExactTokensForTokens", "outputs": [ { "internalType": "uint256[]", "name": "amounts", "type": "uint256[]" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "tokenA", "outputs": [ { "internalType": "contract IERC20", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "tokenB", "outputs": [ { "internalType": "contract IERC20", "name": "", "type": "address" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalLiquidity", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" } ];
 
 
+let provider, signer, userAddress, simpleSwap, tokenA, tokenB;
+let currentPrice = 0;
+let reverseSwap = false; // Initialize reverseSwap state
+
+// Expose functions to the global scope for HTML onclick attributes
 window.toggleSwapDirection = toggleSwapDirection;
 window.setValueTokenToSpend = setValueTokenToSpend;
 window.updateSwapButton = updateSwapButton;
@@ -15,16 +28,7 @@ window.connect = connect;
 window.mintTokenA = mintTokenA;
 window.mintTokenB = mintTokenB;
 window.animateSwapButton = animateSwapButton;
-window.addInitialLiquidity = addInitialLiquidity; // Expose new function
-
-// Token ABIs (ERC20 standard interface) and SimpleSwap ABI
-const tokenAAbi = [{"inputs":[{"internalType":"uint256","name":"initialSupply","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"allowance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientAllowance","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"balance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientBalance","type":"error"},{"inputs":[{"internalType":"address","name":"approver","type":"address"}],"name":"ERC20InvalidApprover","type":"error"},{"inputs":[{"internalType":"address","name":"receiver","type":"address"}],"name":"ERC20InvalidReceiver","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"ERC20InvalidSender","type":"error"},{"inputs":[{"internalType":"address","name":"spender","type":"address"}],"name":"ERC20InvalidSpender","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}]
-const tokenBAbi = [{"inputs":[{"internalType":"uint256","name":"initialSupply","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"allowance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientAllowance","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"balance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientBalance","type":"error"},{"inputs":[{"internalType":"address","name":"approver","type":"address"}],"name":"ERC20InvalidApprover","type":"error"},{"inputs":[{"internalType":"address","name":"receiver","type":"address"}],"name":"ERC20InvalidReceiver","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"ERC20InvalidSender","type":"error"},{"inputs":[{"internalType":"address","name":"spender","type":"address"}],"name":"ERC20InvalidSpender","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"mint","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}]
-const abiSS = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"allowance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientAllowance","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"balance","type":"uint256"},{"internalType":"uint256","name":"needed","type":"uint256"}],"name":"ERC20InsufficientBalance","type":"error"},{"inputs":[{"internalType":"address","name":"approver","type":"address"}],"name":"ERC20InvalidApprover","type":"error"},{"inputs":[{"internalType":"address","name":"receiver","type":"address"}],"name":"ERC20InvalidReceiver","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"ERC20InvalidSender","type":"error"},{"inputs":[{"internalType":"address","name":"spender","type":"address"}],"name":"ERC20InvalidSpender","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[{"internalType":"address","name":"tokenA","type":"address"},{"internalType":"address","name":"tokenB","type":"address"},{"internalType":"uint256","name":"amountADesired","type":"uint256"},{"internalType":"uint256","name":"amountBDesired","type":"uint256"},{"internalType":"uint256","name":"amountAMin","type":"uint256"},{"internalType":"uint256","name":"amountBMin","type":"uint256"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"deadline","type":"uint256"}],"name":"addLiquidity","outputs":[{"internalType":"uint256","name":"amountASent","type":"uint256"},{"internalType":"uint256","name":"amountBSent","type":"uint256"},{"internalType":"uint256","name":"liquidity","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amountIn","type":"uint256"},{"internalType":"uint256","name":"reserveIn","type":"uint256"},{"internalType":"uint256","name":"reserveOut","type":"uint256"}],"name":"getAmountOut","outputs":[{"internalType":"uint256","name":"amountOut","type":"uint256"}],"stateMutability":"pure","type":"function"},{"inputs":[{"internalType":"address","name":"tokenA","type":"address"},{"internalType":"address","name":"tokenB","type":"address"}],"name":"getPrice","outputs":[{"internalType":"uint256","name":"price","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"pairPools","outputs":[{"internalType":"uint256","name":"reserveA","type":"uint256"},{"internalType":"uint256","name":"reserveB","type":"uint256"},{"internalType":"uint256","name":"totalLiquidity","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"tokenA","type":"address"},{"internalType":"address","name":"tokenB","type":"address"},{"internalType":"uint256","name":"liquidity","type":"uint256"},{"internalType":"uint256","name":"amountAMin","type":"uint256"},{"internalType":"uint256","name":"amountBMin","type":"uint256"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"deadline","type":"uint256"}],"name":"removeLiquidity","outputs":[{"internalType":"uint256","name":"amountASent","type":"uint256"},{"internalType":"uint256","name":"amountBSent","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amountIn","type":"uint256"},{"internalType":"uint256","name":"amountOutMin","type":"uint256"},{"internalType":"address[]","name":"path","type":"address[]"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"deadline","type":"uint256"}],"name":"swapExactTokensForTokens","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}]
-
-let provider, signer, userAddress, simpleSwap, tokenA, tokenB;
-let currentPrice = 0;
-let reverseSwap = false;
+window.addInitialLiquidity = addInitialLiquidity;
 
 // Connect to MetaMask and initialize contracts
 async function connect() {
@@ -38,13 +42,19 @@ async function connect() {
 
         provider = new ethers.providers.Web3Provider(window.ethereum);
         signer = provider.getSigner();
-        userAddress = accounts[0];
+        userAddress = accounts[0]; // Use accounts[0] directly
 
         document.getElementById("account").innerText = userAddress;
 
         tokenA = new ethers.Contract(tokenAAddress, tokenAAbi, signer);
         tokenB = new ethers.Contract(tokenBAddress, tokenBAbi, signer);
         simpleSwap = new ethers.Contract(simpleSwapAddress, abiSS, signer);
+
+        // Fetch reserves directly from SimpleSwap contract
+        const reserveA = await simpleSwap.reserveA();
+        const reserveB = await simpleSwap.reserveB();
+        console.log("Reserves A: " + ethers.utils.formatUnits(reserveA, 18));
+        console.log("Reserves B: " + ethers.utils.formatUnits(reserveB, 18));
 
         await fetchBalances();
         await getPrice(); // Attempt to get price immediately after connection
@@ -84,14 +94,14 @@ function disableAllButtons() {
     document.querySelector('.IWANT').value = ""; // Clear output field
     document.getElementById("swap-submit").disabled = true;
     document.getElementById("swap-reverse-btn").disabled = true; // Disable swap reverse button
-    document.getElementById("price").textContent = "0 TKB"; // Reset price display
+    document.getElementById("precio").textContent = "0 TKB"; // Reset price display (using new ID)
 }
 
 // Show token balances
 async function fetchBalances() {
     if (!userAddress || !tokenA || !tokenB) {
-        document.getElementById("send-balance").innerText = "0";
-        document.getElementById("receive-balance").innerText = "0";
+        document.getElementById("balanceA").innerText = "0";
+        document.getElementById("balanceB").innerText = "0";
         return;
     }
     try {
@@ -99,33 +109,37 @@ async function fetchBalances() {
         const balanceB = await tokenB.balanceOf(userAddress);
 
         // Format balances for display
-        document.getElementById("send-balance").innerText = reverseSwap ? ethers.utils.formatUnits(balanceB, 18) : ethers.utils.formatUnits(balanceA, 18);
-        document.getElementById("receive-balance").innerText = reverseSwap ? ethers.utils.formatUnits(balanceA, 18) : ethers.utils.formatUnits(balanceB, 18);
+        document.getElementById("balanceA").innerText = ethers.utils.formatUnits(balanceA, 18);
+        document.getElementById("balanceB").innerText = ethers.utils.formatUnits(balanceB, 18);
+
+        // Update the displayed balance for the "send" side based on reverseSwap
+        // The HTML uses balanceA and balanceB directly, not send-balance/receive-balance for the main balance display
+        // The labels "You send (Token A)" and "You receive (Token B)" are updated in toggleSwapDirection
     } catch (err) {
         console.error("Error fetching balances:", err);
-        document.getElementById("send-balance").innerText = "Error";
-        document.getElementById("receive-balance").innerText = "Error";
+        document.getElementById("balanceA").innerText = "Error";
+        document.getElementById("balanceB").innerText = "Error";
     }
 }
 
 // Get current exchange price between tokenA and tokenB
 async function getPrice() {
     if (!simpleSwap || !tokenAAddress || !tokenBAddress) {
-        document.getElementById("price").innerText = "Not connected";
+        document.getElementById("precio").innerText = "Not connected";
         return;
     }
     try {
         const price = await simpleSwap.getPrice(tokenAAddress, tokenBAddress);
         currentPrice = ethers.utils.formatUnits(price, 18);
         // Adjust price display based on swap direction
-        document.getElementById("price").innerText = currentPrice + (reverseSwap ? " TKA/TKB" : " TKB/TKA");
+        document.getElementById("precio").innerText = currentPrice + (reverseSwap ? " TKA/TKB" : " TKB/TKA");
     } catch (err) {
         console.error("Error getting price:", err);
         // Specific check for "No liquidity available"
         if (err.message && err.message.includes("No liquidity available")) {
-            document.getElementById("price").innerText = "No liquidity";
+            document.getElementById("precio").innerText = "No liquidity";
         } else {
-            document.getElementById("price").innerText = "Error";
+            document.getElementById("precio").innerText = "Error";
         }
     }
 }
@@ -134,7 +148,7 @@ async function getPrice() {
 async function setValueTokenToSpend() {
     const inputElement = document.querySelector('.IHAVE');
     const outputInput = document.querySelector('.IWANT');
-    const priceLabel = document.getElementById("price");
+    const priceLabel = document.getElementById("precio");
 
     if (!simpleSwap || !tokenAAddress || !tokenBAddress || !userAddress) {
         outputInput.value = "Connect wallet";
@@ -152,19 +166,21 @@ async function setValueTokenToSpend() {
     }
 
     try {
+        // Parse input amount, assuming 18 decimals for ERC20 tokens
         const parsedAmount = ethers.utils.parseUnits(input, 18);
-        const pairId = ethers.utils.solidityKeccak256(["address", "address"], [tokenAAddress, tokenBAddress]);
-        const reserves = await simpleSwap.pairPools(pairId);
+
+        // Get reserves directly from SimpleSwap contract
+        const reserveA = await simpleSwap.reserveA();
+        const reserveB = await simpleSwap.reserveB();
 
         let reserveIn, reserveOut, symbolOut;
-
         if (reverseSwap) {
-            reserveIn = reserves.reserveB;
-            reserveOut = reserves.reserveA;
+            reserveIn = reserveB;
+            reserveOut = reserveA;
             symbolOut = "TKA";
         } else {
-            reserveIn = reserves.reserveA;
-            reserveOut = reserves.reserveB;
+            reserveIn = reserveA;
+            reserveOut = reserveB;
             symbolOut = "TKB";
         }
 
@@ -206,12 +222,13 @@ async function mintToken(tokenContract, inputId, tokenName) {
         return;
     }
     try {
-        const amount = document.getElementById(inputId).value; // Keep as string for parseUnits
+        const amount = document.getElementById(inputId).value; // Get value as string
         if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
             alert(`❌ Enter a valid amount for ${tokenName}`);
             return;
         }
-        const parsedAmount = ethers.utils.parseUnits(amount, 18); // Parse to wei
+        // Parse to wei (BigNumber) assuming 18 decimals
+        const parsedAmount = ethers.utils.parseUnits(amount, 18);
 
         showSpinner();
         const tx = await tokenContract.mint(userAddress, parsedAmount);
@@ -242,7 +259,8 @@ async function handleApproveOrSwap() {
     }
 
     try {
-        const parsedAmount = ethers.utils.parseUnits(input, 18); // Amount to swap
+        // Parse input amount, assuming 18 decimals for ERC20 tokens
+        const parsedAmount = ethers.utils.parseUnits(input, 18);
 
         const tokenToSpend = reverseSwap ? tokenB : tokenA; // Determine which token to spend
         const tokenToReceive = reverseSwap ? tokenA : tokenB; // Determine which token to receive
@@ -270,12 +288,30 @@ async function handleApproveOrSwap() {
             );
             const receipt = await tx.wait();
 
-            // The SimpleSwap contract ABI doesn't have a TokensSwapped event,
-            // so we'll just confirm the transaction went through.
-            alert(`✅ Swap succeeded!\nTx Hash: ${tx.hash}`);
+            // Check for TokensSwapped event if available in the ABI
+            const event = receipt.events?.find((e) => e.event === "TokensSwapped");
+
+            if (event && event.args) {
+                const { swapper, amountIn, amountOut, tokenIn, tokenOut } = event.args;
+                // Format event arguments for display
+                const formattedIn = ethers.utils.formatUnits(amountIn, 18);
+                const formattedOut = ethers.utils.formatUnits(amountOut, 18);
+
+                alert(
+                    `✅ Swap realizado con éxito\n📄 Tx Hash: ${tx.hash}\n\n` +
+                    `👤 Swapper: ${swapper}\n` +
+                    `💸 Cantidad enviada: ${formattedIn}\n` +
+                    `💰 Cantidad recibida: ${formattedOut}\n` +
+                    `🔁 From: ${tokenIn}\n` +
+                    `➡️ To: ${tokenOut}`
+                );
+            } else {
+                alert(`✅ Swap realizado con éxito\n📄 Tx Hash: ${tx.hash}\nℹ️ (No se encontró el evento en logs)`);
+            }
 
             document.querySelector('.IHAVE').value = "";
             document.querySelector('.IWANT').value = "";
+
             await fetchBalances();
             await getPrice(); // Re-fetch price as reserves changed
         }
@@ -312,22 +348,25 @@ async function updateSwapButton() {
     }
 
     try {
+        // Parse input amount, assuming 18 decimals for ERC20 tokens
         const parsedAmount = ethers.utils.parseUnits(inputAmount, 18);
-        const tokenToSpend = reverseSwap ? tokenB : tokenA;
-        // const tokenToReceive = reverseSwap ? tokenA : tokenB; // Not directly used here
 
-        const allowance = await tokenToSpend.allowance(userAddress, simpleSwapAddress);
+        const tokenToSpend = reverseSwap ? tokenB : tokenA;
         const balance = await tokenToSpend.balanceOf(userAddress);
 
-        const pairId = ethers.utils.solidityKeccak256(["address", "address"], [tokenAAddress, tokenBAddress]);
-        const reserves = await simpleSwap.pairPools(pairId);
+        // Get reserves directly from SimpleSwap contract
+        const reserveA = await simpleSwap.reserveA();
+        const reserveB = await simpleSwap.reserveB();
 
         let reserveIn;
         if (reverseSwap) {
-            reserveIn = reserves.reserveB;
+            reserveIn = reserveB;
         } else {
-            reserveIn = reserves.reserveA;
+            reserveIn = reserveA;
         }
+
+        const allowance = await tokenToSpend.allowance(userAddress, simpleSwapAddress);
+
 
         if (balance.lt(parsedAmount)) {
             button.innerText = `Insufficient ${reverseSwap ? 'Token B' : 'Token A'} balance`;
@@ -335,19 +374,15 @@ async function updateSwapButton() {
         } else if (reserveIn.isZero()) {
             button.innerText = "No liquidity";
             button.disabled = true;
+        } else if (parsedAmount.gt(reserveIn)) { // Check if input amount exceeds pool reserve
+            button.innerText = "Insufficient pool liquidity";
+            button.disabled = true;
+        } else if (allowance.gte(parsedAmount)) {
+            button.innerText = "Swap";
+            button.disabled = false;
         } else {
-            // Check if the amount to swap exceeds the available reserve
-            // This is a common check to prevent transactions from failing due to insufficient liquidity in the pool
-            if (parsedAmount.gt(reserveIn)) {
-                button.innerText = "Insufficient pool liquidity";
-                button.disabled = true;
-            } else if (allowance.gte(parsedAmount)) {
-                button.innerText = "Swap";
-                button.disabled = false;
-            } else {
-                button.innerText = "Approve";
-                button.disabled = false;
-            }
+            button.innerText = "Approve";
+            button.disabled = false;
         }
     } catch (err) {
         console.error("Error updating swap button:", err);
@@ -361,15 +396,13 @@ function toggleSwapDirection() {
 
     const sendLabel = document.getElementById("send-label");
     const receiveLabel = document.getElementById("receive-label");
-    // const sendBalanceElement = document.getElementById("send-balance"); // Not directly used here
-    // const receiveBalanceElement = document.getElementById("receive-balance"); // Not directly used here
     const inputElement = document.querySelector('.IHAVE');
     const outputElement = document.querySelector('.IWANT');
 
     // Clear inputs and reset price display when toggling
     inputElement.value = "";
     outputElement.value = "";
-    document.getElementById("price").textContent = "0 " + (reverseSwap ? "TKA" : "TKB");
+    document.getElementById("precio").textContent = "0 " + (reverseSwap ? "TKA" : "TKB");
 
 
     if (reverseSwap) {
@@ -412,6 +445,7 @@ async function addInitialLiquidity() {
     }
 
     // Define initial amounts for liquidity. You can make these dynamic later if needed.
+    // Assuming 18 decimals for tokens
     const amountAToAdd = ethers.utils.parseUnits("1000", 18); // Example: 1000 Token A
     const amountBToAdd = ethers.utils.parseUnits("1000", 18); // Example: 1000 Token B
 
@@ -503,9 +537,9 @@ if (window.ethereum) {
             document.getElementById("account").innerText = "-";
             disableAllButtons();
             document.getElementById("connect").disabled = false; // Re-enable connect button
-            document.getElementById("send-balance").innerText = "0";
-            document.getElementById("receive-balance").innerText = "0";
-            document.getElementById("price").innerText = "0 TKB"; // Reset price
+            document.getElementById("balanceA").innerText = "0";
+            document.getElementById("balanceB").innerText = "0";
+            document.getElementById("precio").innerText = "0 TKB";
             document.querySelector('.IHAVE').value = "";
             document.querySelector('.IWANT').value = "";
         }

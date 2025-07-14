@@ -25,10 +25,7 @@ Ideal for learning and testing a minimal decentralized exchange (DEX) environmen
 /frontend
 │
 ├── index.html      # Main user interface (TailwindCSS)
-├── script.js       # Web3 logic and contract interaction
-├── tokenAAbi.js    # Token A ABI
-├── tokenBAbi.js    # Token B ABI
-├── abiSS.js        # SimpleSwap contract ABI
+├── script.js       # Web3 logic and contract interaction, and ABIs
 │
 /test
 ├── SimpleSwap.js   # Hardhat automated contract tests
@@ -46,6 +43,31 @@ Ideal for learning and testing a minimal decentralized exchange (DEX) environmen
 
 ---
 
+## 🚀 How to Use
+1. ** Clone this repository and open /frontend/index.html in your browser **
+or deploy the frontend to your favorite static host.
+
+2. **Connect your wallet:**
+Click the Connect Wallet button (top right) to link your MetaMask account.
+
+3. **Mint tokens:**
+Use the "Mint Tokens & Liquidity" section to mint test TokenA (TKA) and TokenB (TKB) to your wallet. You'll need some tokens to add liquidity.
+
+4. **Add Initial Liquidity:**
+After minting tokens, use the "Add Initial Liquidity" button in the "Mint Tokens & Liquidity" section. This will populate the swap pool, allowing swaps to function.
+
+5. **Swap tokens:**
+
+- Enter an amount in "You send".
+
+- Use the center button to reverse swap direction.
+
+- Approve tokens if prompted, then execute the swap.
+
+- See your balances and the estimated output update in real time.
+
+---
+
 ## 🔧 Prerequisites
 
 - MetaMask installed and connected to the Sepolia Ethereum testnet
@@ -53,24 +75,6 @@ Ideal for learning and testing a minimal decentralized exchange (DEX) environmen
 
 ---
 
-## 🚀 How to Use
-
-1. **Clone this repository** and open `/frontend/index.html` in your browser  
-   _or deploy the frontend to your favorite static host._
-
-2. **Connect your wallet:**  
-   Click the **Connect Wallet** button (top right) to link your MetaMask account.
-
-3. **Mint tokens:**  
-   Use the "Mint Tokens" section to mint test TokenA (TKA) and TokenB (TKB) to your wallet.
-
-4. **Swap tokens:**  
-   - Enter an amount in "You send".
-   - Use the center button to reverse swap direction.
-   - Approve tokens if prompted, then execute the swap.
-   - See your balances and the estimated output update in real time.
-
----
 
 ## 🔄 Features
 
@@ -90,16 +94,6 @@ The frontend is configured for the following contracts on Sepolia:
 - **TokenA:** `0xF5868801cf665b60821FBD26e0846326BfCCbD79`
 - **TokenB:** `0x4c55a1C8606B53d4c26FBc75433C1698F546f48e`
 
-Contract ABIs are included in the `/frontend` folder.
-
----
-
-## 🧪 Manual Testing
-
-- Mint any amount of TokenA or TokenB
-- Try swaps in both directions
-- Check balances and price updates after each operation
-- Test edge cases (e.g., insufficient balance, zero/negative values)
 
 ---
 
@@ -120,11 +114,15 @@ Tests cover:
    ```bash
    npm install
    ```
-2. Run the tests:
+2. Install hardhat toolbox:
+   ```bash
+   npm install --save-dev @nomicfoundation/hardhat-toolbox
+   ```
+3. Run the tests:
    ```bash
    npx hardhat test
    ```
-3. (Optional) Check coverage:
+4. Check coverage:
    ```bash
    npx hardhat coverage
    ```
@@ -135,10 +133,12 @@ Tests cover:
 
 _Example UI:_
 
+<img width="295" height="525" alt="chrome-capture-2025-07-13" src="https://github.com/user-attachments/assets/8c735cc7-8294-494c-b699-0b9906b172ec" />
 
 
 _Test output:_
 
+<img width="546" height="614" alt="(2) Testing Hardhat - simpleswap" src="https://github.com/user-attachments/assets/f88849d7-2fc5-4c4e-8229-5189df9da205" />
 
 
 ---
